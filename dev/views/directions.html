@@ -184,11 +184,13 @@ function addImg(url, id) {
                 function(data, status){
                   $('#map').fadeIn();
                   $('#formRisk').fadeOut();
-                  setDirections(userLoc, "Edinburgh", "en_US");
+                  console.log(data);
+                  setDirections(userLoc, data.destination, "en_US");
                   var substr = ['hi', 'hello', 'why'];
                   var crimesDiv = $('#crimes');
-                  substr.forEach(function(item) {
-                      $('<li class="list-group-item">'+item +'</li>').appendTo(crimesDiv);
+                  var crimedata = data.crimes;
+                  crimedata.forEach(function(item) {
+                      $('<li class="list-group-item">'+ item.id + ' - ' + item.category + " -  " + item.month+'</li>').appendTo(crimesDiv);
                   });
                 });
             });
@@ -210,7 +212,7 @@ function addImg(url, id) {
     <div class="directions" id="map" style="display:none">
 
         <div id="map_canvas" style="width: 50%; height: 400px; float: left"></div>
-        <div style="width: 50%; height: 400px; float: left; margin-left: 50px;">
+        <div style="width: 50%; height: 400px; margin: auto;">
           <ul id="crimes" class="list-group col-md-5">
 
           </ul>
