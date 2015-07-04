@@ -2,9 +2,14 @@
 
 export default getConfig;
 
+import googleAPI from './lib/google-maps';
+import what3words from './lib/what-3-words';
+import police from './lib/police';
+
 const winston = require('winston');
 
 function getConfig() {
+  let keys = require('../keys.json');
   let env = getEnvVariables();
   //let isProduction = env.node === 'production';
 
@@ -24,8 +29,13 @@ function getConfig() {
     logger: winston,
     cache: {
       pages: 3600
-    }
+    },
+    apis: { }
   };
+
+  config.apis.google = googleAPI(config, keys.google);
+  config.apis.what3words = what3words(config, keys.what3words);
+  config.apis.police = police(config);
 
   return Promise.resolve(new Map(setIterabilityToObj(config)));
 }
