@@ -1,8 +1,8 @@
 /**
  * @ngdoc directive
  * @name places-auto-complete
- * @requires Attr2Options 
- * @description 
+ * @requires Attr2Options
+ * @description
  *   Provides address auto complete feature to an input element
  *   Requires: input tag
  *   Restrict To: Attribute
@@ -11,7 +11,7 @@
  *    https://developers.google.com/maps/documentation/javascript/3.exp/reference#AutocompleteOptions
  *
  * @example
- * Example: 
+ * Example:
  *   <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
  *   <input places-auto-complete types="['geocode']" />
  */
@@ -55,6 +55,6 @@
   };
 
   placesAutoComplete.$inject = ['Attr2Options', '$timeout'];
-  angular.module('ngMap').directive('placesAutoComplete', placesAutoComplete); 
+  angular.module('ngMap').directive('placesAutoComplete', placesAutoComplete);
 
 })();

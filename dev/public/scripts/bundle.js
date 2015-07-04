@@ -170,21 +170,21 @@ ngMap.directive('customControl', ['Attr2Options', '$compile', function (Attr2Opt
 /**
  * @ngdoc directive
  * @name directions
- * @description 
+ * @description
  *   Enable directions on map. e.g., origin, destination, draggable, waypoints, etc
- *   
+ *
  *   Requires:  map directive
  *
- *   Restrict To:  Element 
+ *   Restrict To:  Element
  *
- * @param {String} &lt;DirectionsRendererOptions> Any DirectionsRendererOptions, 
+ * @param {String} &lt;DirectionsRendererOptions> Any DirectionsRendererOptions,
  *   https://developers.google.com/maps/documentation/javascript/reference#DirectionsRendererOptions
- * @param {String} &lt;DirectionsRequest Options> Any DirectionsRequest options, 
+ * @param {String} &lt;DirectionsRequest Options> Any DirectionsRequest options,
  *   https://developers.google.com/maps/documentation/javascript/reference#DirectionsRequest
  * @example
- * Example: 
+ * Example:
  *   <map zoom="14" center="37.7699298, -122.4469157">
- *     <directions 
+ *     <directions
  *       draggable="true"
  *       panel="directions-panel"
  *       travel-mode="{{travelMode}}"
@@ -192,7 +192,7 @@ ngMap.directive('customControl', ['Attr2Options', '$compile', function (Attr2Opt
  *       origin="{{origin}}"
  *       destination="{{destination}}">
  *     </directions>
- *   </map> 
+ *   </map>
  */
 /* global google */
 'use strict';
@@ -211,7 +211,7 @@ ngMap.directive('customControl', ['Attr2Options', '$compile', function (Attr2Opt
     return renderer;
   };
 
-  var directions = function directions(Attr2Options, $timeout) {
+  var directions = function directions(scope, Attr2Options, $timeout) {
     var parser = Attr2Options;
     var directionsService = new google.maps.DirectionsService();
 
@@ -223,6 +223,10 @@ ngMap.directive('customControl', ['Attr2Options', '$compile', function (Attr2Opt
       for (var key in request) {
         validKeys.indexOf(key) === -1 && delete request[key];
       }
+      scope.obj.origin = 'Liverpool Street Station, Liverpool Street, London, United Kingdom';
+      scope.obj.destination = 'Victoria Station, London, United Kingdom';
+      request.origin = scope.obj.origin;
+      request.destination = scope.obj.destination;
 
       if (request.origin && request.destination) {
         console.log('request', request);
@@ -1076,6 +1080,50 @@ ngMap.directive('mapType', ['Attr2Options', '$window', function (Attr2Options, $
 
   angular.module("ngMap").directive("map", ["Attr2Options", "$timeout", "$parse", mapDirective]);
 })();
+/**
+ * @ngdoc directive
+ * @name maps-engine-layer
+ * @description 
+ *   Requires:  map directive
+ *   Restrict To:  Element
+ *
+ * @example
+ * Example: 
+ *   <map zoom="14" center="[59.322506, 18.010025]">
+ *     <maps-engine-layer layer-id="06673056454046135537-08896501997766553811"></maps-engine-layer>
+ *    </map>
+ */
+/*jshint -W089*/
+'use strict';
+
+ngMap.directive('mapsEngineLayer', ['Attr2Options', function (Attr2Options) {
+  var parser = Attr2Options;
+
+  var getMapsEngineLayer = function getMapsEngineLayer(options, events) {
+    var layer = new google.maps.visualization.MapsEngineLayer(options);
+
+    for (var eventName in events) {
+      google.maps.event.addListener(layer, eventName, events[eventName]);
+    }
+
+    return layer;
+  };
+
+  return {
+    restrict: 'E',
+    require: '^map',
+
+    link: function link(scope, element, attrs, mapController) {
+      var filtered = parser.filter(attrs);
+      var options = parser.getOptions(filtered);
+      var events = parser.getEvents(scope, filtered, events);
+      console.log('maps-engine-layer options', options, 'events', events);
+
+      var layer = getMapsEngineLayer(options, events);
+      mapController.addObject('mapsEngineLayers', layer);
+    }
+  }; // return
+}]);
 /* global google */
 'use strict';
 
@@ -1238,50 +1286,6 @@ ngMap.directive('mapType', ['Attr2Options', '$window', function (Attr2Options, $
   MapController.$inject = ['$q', 'NavigatorGeolocation', 'GeoCoder', 'Attr2Options'];
   angular.module('ngMap').controller('MapController', MapController);
 })();
-/**
- * @ngdoc directive
- * @name maps-engine-layer
- * @description 
- *   Requires:  map directive
- *   Restrict To:  Element
- *
- * @example
- * Example: 
- *   <map zoom="14" center="[59.322506, 18.010025]">
- *     <maps-engine-layer layer-id="06673056454046135537-08896501997766553811"></maps-engine-layer>
- *    </map>
- */
-/*jshint -W089*/
-'use strict';
-
-ngMap.directive('mapsEngineLayer', ['Attr2Options', function (Attr2Options) {
-  var parser = Attr2Options;
-
-  var getMapsEngineLayer = function getMapsEngineLayer(options, events) {
-    var layer = new google.maps.visualization.MapsEngineLayer(options);
-
-    for (var eventName in events) {
-      google.maps.event.addListener(layer, eventName, events[eventName]);
-    }
-
-    return layer;
-  };
-
-  return {
-    restrict: 'E',
-    require: '^map',
-
-    link: function link(scope, element, attrs, mapController) {
-      var filtered = parser.filter(attrs);
-      var options = parser.getOptions(filtered);
-      var events = parser.getEvents(scope, filtered, events);
-      console.log('maps-engine-layer options', options, 'events', events);
-
-      var layer = getMapsEngineLayer(options, events);
-      mapController.addObject('mapsEngineLayers', layer);
-    }
-  }; // return
-}]);
 /**
  * @ngdoc directive
  * @name marker
@@ -1460,8 +1464,8 @@ ngMap.directive('overlayMapType', ['Attr2Options', '$window', function (Attr2Opt
 /**
  * @ngdoc directive
  * @name places-auto-complete
- * @requires Attr2Options 
- * @description 
+ * @requires Attr2Options
+ * @description
  *   Provides address auto complete feature to an input element
  *   Requires: input tag
  *   Restrict To: Attribute
@@ -1470,7 +1474,7 @@ ngMap.directive('overlayMapType', ['Attr2Options', '$window', function (Attr2Opt
  *    https://developers.google.com/maps/documentation/javascript/3.exp/reference#AutocompleteOptions
  *
  * @example
- * Example: 
+ * Example:
  *   <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
  *   <input places-auto-complete types="['geocode']" />
  */

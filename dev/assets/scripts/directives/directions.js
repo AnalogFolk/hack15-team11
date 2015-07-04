@@ -1,21 +1,21 @@
 /**
  * @ngdoc directive
  * @name directions
- * @description 
+ * @description
  *   Enable directions on map. e.g., origin, destination, draggable, waypoints, etc
- *   
+ *
  *   Requires:  map directive
  *
- *   Restrict To:  Element 
+ *   Restrict To:  Element
  *
- * @param {String} &lt;DirectionsRendererOptions> Any DirectionsRendererOptions, 
+ * @param {String} &lt;DirectionsRendererOptions> Any DirectionsRendererOptions,
  *   https://developers.google.com/maps/documentation/javascript/reference#DirectionsRendererOptions
- * @param {String} &lt;DirectionsRequest Options> Any DirectionsRequest options, 
+ * @param {String} &lt;DirectionsRequest Options> Any DirectionsRequest options,
  *   https://developers.google.com/maps/documentation/javascript/reference#DirectionsRequest
  * @example
- * Example: 
+ * Example:
  *   <map zoom="14" center="37.7699298, -122.4469157">
- *     <directions 
+ *     <directions
  *       draggable="true"
  *       panel="directions-panel"
  *       travel-mode="{{travelMode}}"
@@ -23,7 +23,7 @@
  *       origin="{{origin}}"
  *       destination="{{destination}}">
  *     </directions>
- *   </map> 
+ *   </map>
  */
 /* global google */
 (function() {
@@ -40,7 +40,7 @@
     return renderer;
   };
 
-  var directions = function(Attr2Options, $timeout) {
+  var directions = function(scope, Attr2Options, $timeout) {
     var parser = Attr2Options;
     var directionsService = new google.maps.DirectionsService();
 
@@ -50,12 +50,16 @@
       request.travelMode = request.travelMode || 'DRIVING';
       var validKeys = [
         'origin', 'destination', 'travelMode', 'transitOptions', 'unitSystem',
-        'durationInTraffic', 'waypoints', 'optimizeWaypoints', 
+        'durationInTraffic', 'waypoints', 'optimizeWaypoints',
         'provideRouteAlternatives', 'avoidHighways', 'avoidTolls', 'region'
       ];
       for(var key in request){
         (validKeys.indexOf(key) === -1) && (delete request[key]);
       }
+      scope.obj.origin = "Liverpool Street Station, Liverpool Street, London, United Kingdom";
+      scope.obj.destination = "Victoria Station, London, United Kingdom";
+      request.origin = scope.obj.origin;
+      request.destination = scope.obj.destination;
 
       if (request.origin && request.destination) {
         console.log('request', request);
@@ -66,7 +70,7 @@
             });
           }
         });
-      } 
+      }
     };
 
     var linkFunc = function(scope, element, attrs, mapController) {
@@ -78,7 +82,7 @@
 
       var renderer = getDirectionsRenderer(options, events);
       mapController.addObject('directionsRenderers', renderer);
-      
+
       attrsToObserve.forEach(function(attrName) {
         (function(attrName) {
           attrs.$observe(attrName, function(val) {
@@ -99,7 +103,7 @@
         mapController.deleteObject('directionsRenderers', renderer);
       });
     };
-    
+
     return {
       restrict: 'E',
       require: '^map',
@@ -110,4 +114,3 @@
 
   angular.module('ngMap').directive('directions', directions);
 })();
-

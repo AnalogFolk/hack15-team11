@@ -1,49 +1,227 @@
-
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+ Copyright 2008 Google Inc.
+ Licensed under the Apache License, Version 2.0:
+ http://www.apache.org/licenses/LICENSE-2.0
+ -->
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v="urn:schemas-microsoft-com:vml">
   <head>
-    <title>Place Autocomplete Address Form</title>
-    <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
-    <!-- build:js scripts/ng-map.min.js -->
-    <!--
-    <script src="../app/scripts/app.js"></script>
-    <script src="../app/scripts/services/navigator_geolocation.js"></script>
-    <script src="../app/scripts/services/geo_coder.js"></script>
-    <script src="../app/scripts/services/attr2_options.js"></script>
-    <script src="../app/scripts/directives/places-auto-complete.js"></script>
-    -->
-    <script src="/scripts/bundle.js"></script>
-    <!-- endbuild -->
-    <script>
-      angular.module('myApp', ['ngMap'])
-       .controller('MyCtrl', function($scope) {
-         $scope.types = "['establishment']";
-         $scope.placeChanged = function() {
-           $scope.place = this.getPlace();
-         }
-       });
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Maps JavaScript API Example: Directions + Static Map</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src=" http://maps.google.com/?file=api&amp;v=2&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw"
+      type="text/javascript"></script>
+    <style type="text/css">
+      body {
+        font-family: Verdana, Arial, sans serif;
+        font-size: 11px;
+        margin: 2px;
+      }
+      table.directions th {
+        background-color:#EEEEEE;
+      }
+      img {
+        color: #000000;
+      }
+    </style>
+    <script type="text/javascript">
+
+    var map;
+    var gdir;
+    var geocoder = null;
+    var addressMarker;
+
+    function initialize() {
+      if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById("map_canvas"));
+        gdir = new GDirections(map, document.getElementById("directions"));
+        GEvent.addListener(gdir, "addoverlay", onGDirectionsLoad);
+        GEvent.addListener(gdir, "error", handleErrors);
+
+
+      }
+    }
+
+    function setDirections(fromAddress, toAddress, locale) {
+      gdir.load("from: " + fromAddress + " to: " + toAddress,
+                { "locale": locale });
+    }
+
+    function handleErrors(){
+   if (gdir.getStatus().code == G_GEO_UNKNOWN_ADDRESS)
+     alert("No corresponding geographic location could be found for one of the specified addresses. This may be due to the fact that the address is relatively new, or it may be incorrect.\nError code: " + gdir.getStatus().code);
+   else if (gdir.getStatus().code == G_GEO_SERVER_ERROR)
+     alert("A geocoding or directions request could not be successfully processed, yet the exact reason for the failure is not known.\n Error code: " + gdir.getStatus().code);
+   else if (gdir.getStatus().code == G_GEO_MISSING_QUERY)
+     alert("The HTTP q parameter was either missing or had no value. For geocoder requests, this means that an empty address was specified as input. For directions requests, this means that no query was specified in the input.\n Error code: " + gdir.getStatus().code);
+   else if (gdir.getStatus().code == G_GEO_BAD_KEY)
+     alert("The given key is either invalid or does not match the domain for which it was given. \n Error code: " + gdir.getStatus().code);
+   else if (gdir.getStatus().code == G_GEO_BAD_REQUEST)
+     alert("A directions request could not be successfully parsed.\n Error code: " + gdir.getStatus().code);
+   else alert("An unknown error occurred.");
+    }
+
+  function onGDirectionsLoad(){
+   var poly = gdir.getPolyline();
+   if (poly.getVertexCount() > 100) {
+     alert("This route has too many vertices");
+     return;
+   }
+   var baseUrl = "http://maps.google.com/staticmap?";
+
+   var params = [];
+   var markersArray = [];
+   markersArray.push(poly.getVertex(0).toUrlValue(5) + ",greena");
+   markersArray.push(poly.getVertex(poly.getVertexCount()-1).toUrlValue(5) + ",greenb");
+   params.push("markers=" + markersArray.join("|"));
+
+   var polyParams = "rgba:0x0000FF80,weight:5|";
+   var polyLatLngs = [];
+   for (var j = 0; j < poly.getVertexCount(); j++) {
+     polyLatLngs.push(poly.getVertex(j).lat().toFixed(5) + "," + poly.getVertex(j).lng().toFixed(5));
+   }
+   params.push("path=" + polyParams + polyLatLngs.join("|"));
+   params.push("size=300x300");
+   params.push("key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw");
+
+   baseUrl += params.join("&");
+
+   var extraParams = [];
+   extraParams.push("center=" + map.getCenter().lat().toFixed(6) + "," + map.getCenter().lng().toFixed(6));
+   extraParams.push("zoom=" + map.getZoom());
+   addImg(baseUrl + "&" + extraParams.join("&"), "staticMapOverviewIMG");
+
+   var extraParams = [];
+   extraParams.push("center=" + poly.getVertex(0).toUrlValue(5));
+   extraParams.push("zoom=" + 15);
+   addImg(baseUrl + "&" + extraParams.join("&"), "staticMapStartIMG");
+
+   var extraParams = [];
+   extraParams.push("center=" + poly.getVertex(poly.getVertexCount()-1).toUrlValue(5));
+   extraParams.push("zoom=" + 15);
+   addImg(baseUrl + "&" + extraParams.join("&"), "staticMapEndIMG");
+}
+
+function addImg(url, id) {
+ var img = document.createElement("img");
+ img.src = url;
+ document.getElementById(id).innerHTML = "";
+ document.getElementById(id).appendChild(img);
+}
+
     </script>
+
   </head>
+  <body onload="initialize()" onunload="GUnload()">
 
-  <body ng-app="myApp" ng-controller="MyCtrl">
-    Auto Complete Type:
-    <select ng-model="types">
-      <option value="['geocode']">Geodode</option>
-      <option value="['establishment']">Establishment</option>
-      <option value="['address']">Address</option>
-    </select><br/>
+        <div class="container" id="formRisk">
+          <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-7">
+              <h1 class="text-center">Where do you want to go ?</h1>
+              <br><br>
+              <div class="row text-center">
+                <div class="col-md-8 " style="margin: auto; float:none" >
+                  <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">1</span>
+                    <input type="text" id="first" class="form-control" placeholder="First word" aria-describedby="basic-addon1" >
+                  </div>
+                  <br>
+                  <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">2</span>
+                    <input type="text" id="second" class="form-control" placeholder="Second word" aria-describedby="basic-addon1">
+                  </div>
+                  <br>
+                  <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">3</span>
+                    <input type="text" id="third" class="form-control" placeholder="Third word" aria-describedby="basic-addon1">
+                  </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div class="row">
+              <div class="col-md-8 text-center" style="margin: auto; float: none">
+                  <button type="submit" id="sendData" class="btn btn-info">Estimate risk</button>
+              </div>
+            </div>
+          </div>
 
-    Enter an address: <br/>
-    <input places-auto-complete size=80
-      ng-model="address"
-      xxx-component-restrictions="{country:'uk'}"
-      types="{{types}}"
-      on-place-changed="placeChanged(place)" /> <br/>
-    <div ng-show="place">
-      Address = {{place.formatted_address}} <br/>
-      Location: {{place.geometry.location}}<br/>
+
+        </div>
     </div>
-    address : {{address}}
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+          $(document).ready(function(){
+            var userLoc;
+            $.get("http://ipinfo.io", function(response) {
+              userLoc = response.loc;
+              console.log(response.loc);
+            }, "jsonp");
+
+             $("#sendData").click(function(){
+                var first = $('#first').val();
+                var second = $('#second').val();
+                var third = $('#third').val();
+
+                console.log(first, second, third);
+
+
+
+
+                $.post("/risk",
+                {
+                    origin: userLoc,
+                    words: [first, second, third]
+                },
+
+                function(data, status){
+                  $('#map').fadeIn();
+                  $('#formRisk').fadeOut();
+                  setDirections(userLoc, "Edinburgh", "en_US");
+                  var substr = ['hi', 'hello', 'why'];
+                  var crimesDiv = $('#crimes');
+                  substr.forEach(function(item) {
+                      $('<li class="list-group-item">'+item +'</li>').appendTo(crimesDiv);
+                  });
+                });
+            });
+
+
+
+          });
+
+
+
+        </script>
+
+
+
+
+
+
+    <br/>
+    <div class="directions" id="map" style="display:none">
+
+        <div id="map_canvas" style="width: 50%; height: 400px; float: left"></div>
+        <div style="width: 50%; height: 400px; float: left; margin-left: 50px;">
+          <ul id="crimes" class="list-group col-md-5">
+
+          </ul>
+        </div>
+
+    </div>
+
+
+<hr>
+
+<br clear="all"/>
+
   </body>
 </html>
