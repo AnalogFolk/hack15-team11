@@ -20,14 +20,14 @@ var AUTOPREFIXER_BROWSERS = [
 
 // Lint JavaScript
 gulp.task('jslint-client', function () {
-  return gulp.src(['dev\\assets\\scripts\\**\\*.js'])
+  return gulp.src(['dev/assets/scripts/**/*.js'])
   .pipe(browserSync.stream({ once: true }));
   //.pipe(gulpPlugins.eslint())
   //.pipe(gulpPlugins.eslint.format());
 });
 
 gulp.task('jslint-server', function () {
-  return gulp.src(['dev\\**\\*.js', '!dev\\public\\**\\*', '!dev\\assets\\**\\*'])
+  return gulp.src(['dev/**/*.js', '!dev/public/**/*', '!dev/assets/**/*'])
   .pipe(browserSync.stream({ once: true }))
   .pipe(gulpPlugins.eslint())
   .pipe(gulpPlugins.eslint.format());
@@ -37,8 +37,8 @@ gulp.task('jslint-server', function () {
 gulp.task('styles', function () {
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'dev\\assets\\styles\\*.scss',
-    'dev\\assets\\styles\\**\\*.css'
+    'dev/assets/styles/*.scss',
+    'dev/assets/styles/**/*.css'
   ])
   .pipe(gulpPlugins.changed('styles', { extension: '.scss' }))
   .pipe(gulpPlugins.sass({
@@ -46,15 +46,15 @@ gulp.task('styles', function () {
     errLogToConsole: true
   }))
   .pipe(gulpPlugins.autoprefixer({ browsers: AUTOPREFIXER_BROWSERS }))
-  .pipe(gulp.dest('dev\\public\\styles'));
+  .pipe(gulp.dest('dev/public/styles'));
 });
 
 gulp.task('babel-compile-client', function () {
-  return gulp.src('dev\\assets\\scripts\\**\\*.js')
+  return gulp.src('dev/assets/scripts/**/*.js')
   .pipe(gulpPlugins.plumber())
   .pipe(gulpPlugins.babel())
   .pipe(gulpPlugins.concat('bundle.js'))
-  .pipe(gulp.dest('dev\\public\\scripts'))
+  .pipe(gulp.dest('dev/public/scripts'))
 });
 
 gulp.task('client-scripts', ['jslint-client', 'babel-compile-client']);
@@ -76,19 +76,19 @@ gulp.task('dev', ['styles', 'client-scripts', 'jslint-server'], function () {
 
   gulpPlugins.nodemon({
     execMap: {
-      js: ".\\node_modules\\.bin\\babel-node --stage 0"
+      js: "babel-node --stage 0"
     },
-    script: 'dev\\index.js',
+    script: 'dev/index.js',
     ext: 'js',
     watch: ['dev'],
-    ignore: ['dev\\public', 'dev\\assets']
+    ignore: ['dev/public', 'dev/assets']
   })
   .on('change', ['jslint-server'])
   .on('restart', browserSync.reload);
 
-  gulp.watch(['dev\\assets\\styles\\**\\*.{scss,css}'], ['styles']);
-  gulp.watch(['dev\\assets\\scripts\\**\\*.js'], ['client-scripts']);
-  gulp.watch(['dev\\public\\**\\*','dev\\views\\**\\*'], browserSync.reload);
+  gulp.watch(['dev/assets/styles/**/*.{scss,css}'], ['styles']);
+  gulp.watch(['dev/assets/scripts/**/*.js'], ['client-scripts']);
+  gulp.watch(['dev/public/**/*','dev/views/**/*'], browserSync.reload);
 });
 
 // Clean Output Directory
@@ -109,69 +109,69 @@ gulp.task('build', ['clean'], function (cb) {
 
 // Server scripts copy
 gulp.task('babel-compile-server:dist', function () {
-  return gulp.src(['dev\\**\\*.js', '!dev\\assets\\**\\*'])
+  return gulp.src(['dev/**/*.js', '!dev/assets/**/*'])
   .pipe(gulpPlugins.babel({ stage: 0, optional: ['runtime'] }))
-  .pipe(gulp.dest('dist\\built'))
+  .pipe(gulp.dest('dist/built'))
 });
 
 gulp.task('server:dist', ['babel-compile-server:dist'], function () {
   return gulp.src([
-    'dev\\**\\*',
-    '!dev\\**\\*.js',
-    '!dev\\public{,\\**}',
-    '!dev\\assets{,\\**}'
+    'dev/**/*',
+    '!dev/**/*.js',
+    '!dev/public{,/**}',
+    '!dev/assets{,/**}'
   ])
-  .pipe(gulp.dest('dist\\built'))
+  .pipe(gulp.dest('dist/built'))
   .pipe(gulpPlugins.size({ title: 'server' }));
 });
 
 // Copy processed assets
 gulp.task('processed-assets', function () {
   return gulp.src([
-    'dev\\public\\*',
-    'dev\\public\\**\\vendor\\**\\*'
+    'dev/public/*',
+    'dev/public/**/vendor/**/*'
   ])
-  .pipe(gulp.dest('dist\\built\\public'))
+  .pipe(gulp.dest('dist/built/public'))
   .pipe(gulpPlugins.size({ title: 'processed assets' }));
 });
 
 // Optimize Images
 gulp.task('images', function () {
-  return gulp.src('dev\\public\\images\\**\\*')
+  return gulp.src('dev/public/images/**/*')
   .pipe(gulpPlugins.cache(gulpPlugins.imagemin({
     progressive: true,
     interlaced: true
   })))
-  .pipe(gulp.dest('dist\\built\\public\\images'))
+  .pipe(gulp.dest('dist/built/public/images'))
   .pipe(gulpPlugins.size({ title: 'images' }));
 });
 
 // Copy Web Fonts To Dist
 gulp.task('fonts', function () {
-  return gulp.src(['dev\\public\\fonts\\**'])
-  .pipe(gulp.dest('dist\\built\\public\\fonts'))
+  return gulp.src(['dev/public/fonts/**'])
+  .pipe(gulp.dest('dist/built/public/fonts'))
   .pipe(gulpPlugins.size({ title: 'fonts' }));
 });
 
 // Client Scripts
 // For client side no es7 options are set
 gulp.task('babel-compile-client:dist', function () {
-  return gulp.src('dev\\assets\\scripts\\**\\*.js')
+  return gulp.src('dev/assets/scripts/**/*.js')
   .pipe(gulpPlugins.babel())
   .pipe(gulpPlugins.concat('bundle.js'))
-  .pipe(gulp.dest('dist\\built\\public\\scripts'))
+  .pipe(gulp.dest('dist/built/public/scripts'))
 });
 
 gulp.task('client-scripts:dist', ['jslint-client', 'babel-compile-client:dist'], function () {
-  return gulp.src('dev\\assets\\scripts\\bundle.js')
+  return gulp.src('dev/assets/scripts/bundle.js')
   .pipe(gulpPlugins.uglify('bundle.js'))
-  .pipe(gulp.dest('dist\\built\\public\\scripts'))
+  .pipe(gulp.dest('dist/built/public/scripts'))
   .pipe(gulpPlugins.size({ title: 'scripts' }));
 });
 
 gulp.task('styles:dist', ['styles'], function () {
-  return gulp.src('dev\\public\\styles\\**\\*.css')
+  return gulp.src('dev/public/styles/**/*.css')
   .pipe(gulpPlugins.csso())
-  .pipe(gulp.dest('dist\\built\\public\\styles'))
+  .pipe(gulp.dest('dist/built/public/styles'))
   .pipe(gulpPlugins.size({ title: 'styles' }));
 });
