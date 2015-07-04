@@ -31,9 +31,9 @@
       <option value="['address']">Address</option>
     </select><br/>
 
-    Enter an address: <br/>
+    Enter an origin: <br/>
     <input places-auto-complete size=80
-      ng-model="address"
+      ng-model="origin"
       xxx-component-restrictions="{country:'uk'}"
       types="{{types}}"
       on-place-changed="placeChanged(place)" /> <br/>
@@ -41,6 +41,17 @@
       Address = {{place.formatted_address}} <br/>
       Location: {{place.geometry.location}}<br/>
     </div>
-    address : {{address}}
+
+    Enter a destination: <br/>
+    <input places-auto-complete size=80
+      ng-model="destination"
+      xxx-component-restrictions="{country:'uk'}"
+      types="{{types}}"
+      on-place-changed="placeChanged(place)" /> <br/>
+    <div ng-show="place">
+      Address = {{place.formatted_address}} <br/>
+      Location: {{place.geometry.location}}<br/>
+    </div>
+
   </body>
 </html>
