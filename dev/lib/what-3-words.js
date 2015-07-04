@@ -1,6 +1,6 @@
 'use strict';
 
-export default googleMaps;
+export default what3words;
 
 import {request} from './http';
 import extend from 'xtend';
@@ -8,24 +8,22 @@ import extend from 'xtend';
 const baseReqObj = {
     scheme: 'https',
     method: 'GET',
-    hostname: 'maps.googleapis.com'
+    hostname: 'api.what3words.com'
 };
 
-function googleMaps(config, apiKey) {
+function what3words(config, apiKey) {
  return {
-  getRoute: getRoute
+  getPosition: getPosition
  };
 
- function getRoute(origin, destination, travelMode='WALKING') {
+ function getPosition(word1, word2, word3) {
    let reqData = {
      key: apiKey,
-     origin: origin,
-     destination: destination,
-     travelMode: travelMode
+     string: `${word1}.${word2}.${word3}`
    };
 
    return request(extend(baseReqObj, {
-     path: '/maps/api/directions/json'
+     path: '/w3w'
    }), reqData)
    .then(function (data) {
      return data;

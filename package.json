@@ -18,7 +18,7 @@
   "license": "WTFPL",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "DEBUG=hack:* gulp dev",
+    "dev": "DEBUG=hack:*,http* gulp dev",
     "start": "node dev/index.js"
   },
   "dependencies": {
@@ -28,7 +28,8 @@
     "morgan": "^1.5.2",
     "qs": "^4.0.0",
     "swig": "^1.4.2",
-    "winston": "^1.0.0"
+    "winston": "^1.0.0",
+    "xtend": "^4.0.0"
   },
   "devDependencies": {
     "babel": "^5.1.11",

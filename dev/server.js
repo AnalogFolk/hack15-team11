@@ -40,7 +40,7 @@ function start(config) {
 
     // Routes
     Object.keys(routes).forEach(function (route) {
-      expressApp.use('/' + route, routes[route]);
+      expressApp.use(route, routes[route]);
     });
 
     // Post-send middlewares

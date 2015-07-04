@@ -4,3 +4,5 @@ node_modules
 tmp
 *.log
 gh-pages
+keys.json
+dev/public/scripts/bundle.js
